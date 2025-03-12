@@ -1,13 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 
+const API_URL = 'http://localhost:3000/api/users';
+
 const Dashboard = () => {
-    const [usuarios, setUsuarios] = useState([
-        { id: 1, email: 'juan@example.com', name: 'Juan Pérez', passwordHash: 'hashed123' },
-        { id: 2, email: 'maria@example.com', name: 'María López', passwordHash: 'hashed456' }
-    ]);
+    const [usuarios, setUsuarios] = useState([]);
     const [nuevoUsuario, setNuevoUsuario] = useState({ email: '', name: '', passwordHash: '' });
     const [editando, setEditando] = useState(null);
+    const token = localStorage.getItem('token');
+
+    useEffect(() => {
+        cargarUsuarios();
+    }, []);
+
+    // Cargar usuarios desde la base de datos
+    const cargarUsuarios = async () => {
+        try {
+            const response = await fetch(API_URL, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+            const data = await response.json();
+            setUsuarios(data);
+        } catch (error) {
+            console.error('Error cargando usuarios:', error);
+        }
+    };
 
     // Manejar cambios en el formulario
     const handleChange = (e) => {
@@ -15,9 +33,21 @@ const Dashboard = () => {
     };
 
     // Agregar usuario
-    const agregarUsuario = () => {
+    const agregarUsuario = async () => {
         if (nuevoUsuario.email && nuevoUsuario.name && nuevoUsuario.passwordHash) {
-            setUsuarios([...usuarios, { id: Date.now(), ...nuevoUsuario }]);
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(nuevoUsuario)
+                });
+                if (response.ok) cargarUsuarios();
+            } catch (error) {
+                console.error('Error agregando usuario:', error);
+            }
             setNuevoUsuario({ email: '', name: '', passwordHash: '' });
         }
     };
@@ -29,19 +59,35 @@ const Dashboard = () => {
     };
 
     // Guardar cambios en usuario editado
-    const guardarEdicion = () => {
-        setUsuarios(
-            usuarios.map((usuario) =>
-                usuario.id === editando ? { ...usuario, ...nuevoUsuario } : usuario
-            )
-        );
+    const guardarEdicion = async () => {
+        try {
+            const response = await fetch(`${API_URL}/${editando}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify(nuevoUsuario)
+            });
+            if (response.ok) cargarUsuarios();
+        } catch (error) {
+            console.error('Error actualizando usuario:', error);
+        }
         setEditando(null);
         setNuevoUsuario({ email: '', name: '', passwordHash: '' });
     };
 
     // Eliminar usuario
-    const eliminarUsuario = (id) => {
-        setUsuarios(usuarios.filter((usuario) => usuario.id !== id));
+    const eliminarUsuario = async (id) => {
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.ok) cargarUsuarios();
+        } catch (error) {
+            console.error('Error eliminando usuario:', error);
+        }
     };
 
     return (
@@ -77,8 +123,8 @@ const Dashboard = () => {
             </div>
             <ul className="user-list">
                 {usuarios.map((usuario) => (
-                    <li key={usuario.id} className="user-item">
-                        <span>{usuario.email} - {usuario.name}</span>
+                    <li key={usuario.Id} className="user-item">
+                        <span>{usuario.Email} - {usuario.Name}</span>
                         <div className="button-group">
                             <button className="edit-btn" onClick={() => editarUsuario(usuario)}>Editar</button>
                             <button className="delete-btn" onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
