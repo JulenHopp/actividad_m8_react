@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-exports.authenticateToken = (req, res, next) => {
+authenticateToken = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'Acceso denegado' });
 
@@ -10,3 +10,5 @@ exports.authenticateToken = (req, res, next) => {
         next();
     });
 };
+
+module.exports = { authenticateToken };
