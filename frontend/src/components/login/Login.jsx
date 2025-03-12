@@ -2,28 +2,41 @@ import React, { useState } from 'react'
 import { TextField, Button, Box, Typography, Container } from '@mui/material';
 
 const Login = ( { setIsLogged }) => {
+    setIsLogged(false);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
-        console.log(email)
-        console.log(password)
+    
         try {
-            const response = await fetch(`https://littleboxapi.azurewebsites.net/api/login?email=${email}&password=${password}`);
+            const response = await fetch(`http://localhost:3000/api/auth/login`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    user: email,
+                    password: password
+                })
+            });
+    
             if (!response.ok) {
-                throw new Error('Error al conectar con la API');
+                if (response.status === 401) {
+                    alert('Usuario o contraseña incorrectos');
+                } else {
+                    throw new Error('Error al conectar con la API');
+                }
+                return;
             }
     
             const data = await response.json();
+
+            localStorage.setItem("authToken", data.token);
+            
+            setIsLogged(true);
     
-            console.log(data);
-            if (data[0].Result === 1) {
-                setIsLogged(true);
-            } else {
-                alert('Contraseña o usuario incorrecto');
-            }
         } catch (error) {
             console.error('Error durante el login:', error);
             alert('Hubo un problema al conectarse con el servidor');
