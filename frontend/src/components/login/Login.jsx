@@ -33,7 +33,7 @@ const Login = ( { setIsLogged }) => {
     
             const data = await response.json();
 
-            localStorage.setItem("authToken", data.token);
+            localStorage.setItem("token", data.token);
             
             setIsLogged(true);
     
