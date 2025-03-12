@@ -1,5 +1,12 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { getUserByEmail } = require('../services/userService');
+
+const generateToken = (user) => {
+    return jwt.sign({ id: user.Id, email: user.Name  }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+};
 
 const login = async (req, res) => {
     const { user, password } = req.body;
@@ -20,7 +27,8 @@ const login = async (req, res) => {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
 
-        res.json({ message: 'Login exitoso', User: { id: userRecord.Id, name: userRecord.Name } });
+        const token = generateToken(userRecord);
+        res.json({ token });
 
     } catch (error) {
         res.status(500).json({ message: 'Error interno del servidor', error: error.message });
