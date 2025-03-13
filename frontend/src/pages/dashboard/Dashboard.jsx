@@ -42,7 +42,11 @@ const Dashboard = () => {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`
                     },
-                    body: JSON.stringify(nuevoUsuario)
+                    body: JSON.stringify({
+                        Email: nuevoUsuario.email, 
+                        Name: nuevoUsuario.name, 
+                        PasswordHash: nuevoUsuario.passwordHash
+                    })
                 });
                 if (response.ok) cargarUsuarios();
             } catch (error) {
@@ -54,7 +58,7 @@ const Dashboard = () => {
 
     // Editar usuario
     const editarUsuario = (usuario) => {
-        setEditando(usuario.id);
+        setEditando(usuario.Id);
         setNuevoUsuario(usuario);
     };
 
@@ -127,7 +131,7 @@ const Dashboard = () => {
                         <span>{usuario.Email} - {usuario.Name}</span>
                         <div className="button-group">
                             <button className="edit-btn" onClick={() => editarUsuario(usuario)}>Editar</button>
-                            <button className="delete-btn" onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
+                            <button className="delete-btn" onClick={() => eliminarUsuario(usuario.Id)}>Eliminar</button>
                         </div>
                     </li>
                 ))}
