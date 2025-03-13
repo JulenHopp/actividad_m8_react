@@ -3,11 +3,20 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import { Link } from 'react-router'
+import { Link } from 'react-router';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router';
 
 const Navbar = () => {
+  const { setIsLogged } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLogged(false);
+    navigate("/login");
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -25,6 +34,10 @@ const Navbar = () => {
           Contacto
         </Button>
 
+        {/* Botón de Logout */}
+        <Button color="inherit" onClick={handleLogout}>
+          Cerrar Sesión
+        </Button>
       </Toolbar>
     </AppBar>
   );
