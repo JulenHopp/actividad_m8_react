@@ -36,6 +36,8 @@ const Dashboard = () => {
     const agregarUsuario = async () => {
         if (nuevoUsuario.email && nuevoUsuario.name && nuevoUsuario.passwordHash) {
             try {
+                console.log("Enviando usuario:", nuevoUsuario);
+    
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: {
@@ -43,18 +45,25 @@ const Dashboard = () => {
                         Authorization: `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        Email: nuevoUsuario.email, 
-                        Name: nuevoUsuario.name, 
-                        PasswordHash: nuevoUsuario.passwordHash
+                        email: nuevoUsuario.email, 
+                        name: nuevoUsuario.name, 
+                        password: nuevoUsuario.passwordHash
                     })
                 });
-                if (response.ok) cargarUsuarios();
+    
+                const data = await response.json();
+                console.log("Respuesta del servidor:", data);
+    
+                if (response.ok) {
+                    cargarUsuarios(); // Recargar la lista de usuarios
+                }
             } catch (error) {
                 console.error('Error agregando usuario:', error);
             }
             setNuevoUsuario({ email: '', name: '', passwordHash: '' });
         }
     };
+    
 
     // Editar usuario
     const editarUsuario = (usuario) => {

@@ -15,22 +15,27 @@ const getUsers = async (req, res) => {
 
 // Crear nuevo usuario
 const createUser = async (req, res) => {
-    const { name,  email, password } = req.body;
+    const { name, email, password } = req.body;
 
     try {
+        console.log("Datos recibidos:", req.body); // Muestra los datos que llegan
         const hashedPassword = await bcrypt.hash(password, 10);
+        console.log("Contraseña encriptada:", hashedPassword);
 
         const pool = await poolPromise;
         await pool.request()
             .input('Name', sql.NVarChar, name)
             .input('Email', sql.NVarChar, email)
             .input('PasswordHash', sql.NVarChar, hashedPassword)
-            .query(`INSERT INTO ${tableName} (Name, Email, PasswordHash) VALUES (@Name, @email, @PasswordHash)`);
-        res.status(201).send('Usuario creado');
+            .query(`INSERT INTO ${tableName} (Name, Email, PasswordHash) VALUES (@Name, @Email, @PasswordHash)`);
+
+        res.status(201).json({ message: "Usuario creado" });
     } catch (error) {
-        res.status(500).send(error.message);
+        console.error("Error al crear usuario:", error);
+        res.status(500).json({ message: "Error interno del servidor", error: error.message });
     }
 };
+
 
 // Actualizar usuario
 const updateUser = async (req, res) => {
